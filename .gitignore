@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+logs/*.log
+uploads/kyc/*
+uploads/avatars/*
+!uploads/kyc/.gitkeep
+!uploads/avatars/.gitkeep
+.DS_Store
+*.log
+coverage/
+dist/
+.vscode/
+.idea/
