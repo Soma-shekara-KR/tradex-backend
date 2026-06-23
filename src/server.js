@@ -1,6 +1,5 @@
-'use strict';
+﻿'use strict';
 require('express-async-errors');
-const path = require('path');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const renderEnvPath = '/etc/secrets/.env';
@@ -21,7 +20,7 @@ const requestLogger       = require('./middleware/requestLogger');
 const { globalRateLimit } = require('./middleware/rateLimiter');
 const logger              = require('./utils/logger');
 
-// ── Route imports ────────────────────────────────────
+// â”€â”€ Route imports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const authRoutes       = require('./routes/auth.routes');
 const userRoutes       = require('./routes/user.routes');
 const accountRoutes    = require('./routes/account.routes');
@@ -34,7 +33,7 @@ const webhookRoutes    = require('./routes/webhook.routes');
 
 const app = express();
 
-// ── Security & parsing ───────────────────────────────
+// â”€â”€ Security & parsing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(helmet({
   contentSecurityPolicy: false, // set your own CSP in production
   crossOriginEmbedderPolicy: false,
@@ -47,7 +46,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-// Stripe webhooks need raw body — mount BEFORE json middleware
+// Stripe webhooks need raw body â€” mount BEFORE json middleware
 app.use('/api/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -57,10 +56,10 @@ app.use(morgan('combined', { stream: { write: msg => logger.http(msg.trim()) } }
 app.use(requestLogger);
 app.use(globalRateLimit);
 
-// ── Static files ─────────────────────────────────────
+// â”€â”€ Static files â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// ── Health check ─────────────────────────────────────
+// â”€â”€ Health check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -71,7 +70,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ── API Routes ───────────────────────────────────────
+// â”€â”€ API Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const API = `/api/${process.env.API_VERSION || 'v1'}`;
 
 app.use(`${API}/auth`,         authRoutes);
@@ -84,7 +83,7 @@ app.use(`${API}/kyc`,          kycRoutes);
 app.use(`${API}/admin`,        adminRoutes);
 app.use(`${API}/webhooks`,     webhookRoutes);
 
-// ── 404 handler ──────────────────────────────────────
+// â”€â”€ 404 handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -92,10 +91,10 @@ app.use((req, res) => {
   });
 });
 
-// ── Global error handler ─────────────────────────────
+// â”€â”€ Global error handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(errorHandler);
 
-// ── Boot ─────────────────────────────────────────────
+// â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PORT = parseInt(process.env.PORT, 10) || 5000;
 
 async function start() {
@@ -104,15 +103,15 @@ async function start() {
     await connectRedis();
 
     const server = app.listen(PORT, () => {
-      logger.info(`🚀 TradeX API running on port ${PORT} [${process.env.NODE_ENV}]`);
-      logger.info(`📡 API base: http://localhost:${PORT}${API}`);
+      logger.info(`ðŸš€ TradeX API running on port ${PORT} [${process.env.NODE_ENV}]`);
+      logger.info(`ðŸ“¡ API base: http://localhost:${PORT}${API}`);
     });
 
     initSocket(server);
 
     // Graceful shutdown
     const shutdown = (signal) => {
-      logger.info(`${signal} received — shutting down gracefully`);
+      logger.info(`${signal} received â€” shutting down gracefully`);
       server.close(() => {
         logger.info('HTTP server closed');
         process.exit(0);
@@ -130,4 +129,5 @@ async function start() {
 start();
 
 module.exports = app; // for testing
+
 
