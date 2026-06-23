@@ -1,6 +1,10 @@
 'use strict';
 require('express-async-errors');
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+const fs = require('fs');
+const renderEnvPath = '/etc/secrets/.env';
+dotenv.config({ path: fs.existsSync(renderEnvPath) ? renderEnvPath : path.join(__dirname, '../.env') });
 
 const express    = require('express');
 const cors       = require('cors');
@@ -126,3 +130,4 @@ async function start() {
 start();
 
 module.exports = app; // for testing
+
