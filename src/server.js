@@ -1,17 +1,19 @@
 ﻿'use strict';
+
+process.on('uncaughtException', (err) => { console.error('CRASH:', err.message, err.stack); process.exit(1); });
+process.on('unhandledRejection', (r) => { console.error('REJECTION:', r); process.exit(1); });
+
+try { require('dotenv').config({ path: '/etc/secrets/.env' }); } catch(e) {}
+try { require('dotenv').config(); } catch(e) {}
+
 require('express-async-errors');
-const dotenv = require('dotenv');
-const fs = require('fs');
-const renderEnvPath = '/etc/secrets/.env';
-dotenv.config({ path: fs.existsSync(renderEnvPath) ? renderEnvPath : path.join(__dirname, '../.env') });
 
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
+const express     = require('express');
+const cors        = require('cors');
+const helmet      = require('helmet');
+const morgan      = require('morgan');
 const compression = require('compression');
-const path       = require('path');
-
+const path        = require('path');
 const { connectDB }       = require('./config/database');
 const { connectRedis }    = require('./config/redis');
 const { initSocket }      = require('./config/socket');
@@ -129,5 +131,6 @@ async function start() {
 start();
 
 module.exports = app; // for testing
+
 
 
