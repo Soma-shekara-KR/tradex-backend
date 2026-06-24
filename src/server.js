@@ -1,4 +1,5 @@
-﻿'use strict';
+﻿// TradeX API Server v2
+'use strict';
 process.on('uncaughtException', (err) => { console.error('UNCAUGHT:', err.message, err.stack); process.exit(1); });
 process.on('unhandledRejection', (reason) => { console.error('UNHANDLED:', reason); process.exit(1); });
 const fs = require('fs');
@@ -72,3 +73,4 @@ async function start() {
 }
 start();
 module.exports = app;
+
