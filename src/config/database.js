@@ -1,7 +1,6 @@
 ﻿'use strict';
 const { Pool } = require('pg');
 const logger   = require('../utils/logger');
-
 const pool = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -19,11 +18,9 @@ const pool = process.env.DATABASE_URL
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     });
-
 pool.on('error', (err) => {
   logger.error('Unexpected PostgreSQL pool error:', err);
 });
-
 async function connectDB() {
   try {
     const client = await pool.connect();
@@ -35,7 +32,6 @@ async function connectDB() {
     throw err;
   }
 }
-
 async function query(text, params = []) {
   const start = Date.now();
   try {
@@ -50,7 +46,6 @@ async function query(text, params = []) {
     throw err;
   }
 }
-
 async function transaction(callback) {
   const client = await pool.connect();
   try {
@@ -65,5 +60,4 @@ async function transaction(callback) {
     client.release();
   }
 }
-
 module.exports = { connectDB, query, transaction, pool };
