@@ -1,11 +1,12 @@
-﻿// TradeX API Server v2
-'use strict';
+﻿'use strict';
 process.on('uncaughtException', (err) => { console.error('UNCAUGHT:', err.message, err.stack); process.exit(1); });
-process.on('unhandledRejection', (reason) => { console.error('UNHANDLED:', reason); process.exit(1); });
+process.on('unhandledRejection', (r) => { console.error('UNHANDLED:', String(r)); process.exit(1); });
 const fs = require('fs');
 const dotenv = require('dotenv');
-if (fs.existsSync('/etc/secrets/.env')) { dotenv.config({ path: '/etc/secrets/.env' }); } else { dotenv.config(); }
+if (fs.existsSync('/etc/secrets/.env')) dotenv.config({ path: '/etc/secrets/.env' });
+else dotenv.config();
 console.log('DB_HOST:', process.env.DB_HOST || 'NOT SET');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
 console.log('PORT:', process.env.PORT || 'NOT SET');
 require('express-async-errors');
 const express = require('express');
@@ -52,25 +53,12 @@ app.use(`${API}/markets`, marketRoutes);
 app.use(`${API}/kyc`, kycRoutes);
 app.use(`${API}/admin`, adminRoutes);
 app.use(`${API}/webhooks`, webhookRoutes);
-app.use((req, res) => { res.status(404).json({ success: false, message: `Route ${req.method} ${req.originalUrl} not found` }); });
+app.use((req, res) => res.status(404).json({ success: false, message: `${req.method} ${req.originalUrl} not found` }));
 app.use(errorHandler);
-const PORT = parseInt(process.env.PORT, 10) || 5000;
-async function start() {
-  try {
-    console.log('Connecting to database...');
-    await connectDB();
-    console.log('Connecting to Redis...');
-    await connectRedis();
-    const server = app.listen(PORT, '0.0.0.0', () => { logger.info(`TradeX API running on port ${PORT}`); console.log(`TradeX API running on port ${PORT}`); });
-    initSocket(server);
-    process.on('SIGTERM', () => server.close(() => process.exit(0)));
-    process.on('SIGINT', () => server.close(() => process.exit(0)));
-  } catch (err) {
-    console.error('STARTUP FAILED:', err.message);
-    console.error(err.stack);
-    process.exit(1);
-  }
-}
-start();
+const PORT = parseInt(process.env.PORT, 10) || 10000;
+const server = app.listen(PORT, '0.0.0.0', () => { console.log(`Server listening on port ${PORT}`); logger.info(`TradeX API running on port ${PORT}`); });
+initSocket(server);
+connectDB().then(() => { console.log('DB connected'); return connectRedis(); }).then(() => { console.log('Redis done'); }).catch((err) => { console.error('DB error (non-fatal):', err.message); });
+process.on('SIGTERM', () => server.close(() => process.exit(0)));
+process.on('SIGINT', () => server.close(() => process.exit(0)));
 module.exports = app;
-
