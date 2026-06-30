@@ -32,6 +32,7 @@ const kycRoutes = require('./routes/kyc.routes');
 const adminRoutes = require('./routes/admin.routes');
 const webhookRoutes = require('./routes/webhook.routes');
 const app = express();
+app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true, methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization','X-Requested-With'] }));
 app.use('/api/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
@@ -62,3 +63,4 @@ connectDB().then(() => { console.log('DB connected'); return connectRedis(); }).
 process.on('SIGTERM', () => server.close(() => process.exit(0)));
 process.on('SIGINT', () => server.close(() => process.exit(0)));
 module.exports = app;
+
