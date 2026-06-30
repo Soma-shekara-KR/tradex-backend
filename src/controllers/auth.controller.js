@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 const bcrypt   = require('bcryptjs');
 const crypto   = require('crypto');
 const User     = require('../models/user.model');
@@ -9,7 +9,7 @@ const { success, created, badRequest, unauthorized, notFound, conflict } = requi
 const EmailService  = require('../services/email.service');
 const logger        = require('../utils/logger');
 
-// ── Register ─────────────────────────────────────────
+// â”€â”€ Register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function register(req, res) {
   const { email, password, firstName, lastName, phone, country, referralCode } = req.body;
 
@@ -38,10 +38,11 @@ async function register(req, res) {
   return created(res, { userId: user.id, email: user.email }, 'Account created. Please verify your email.');
 }
 
-// ── Login ────────────────────────────────────────────
+// â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function login(req, res) {
   const { email, password } = req.body;
-  const ip = req.headers['x-forwarded-for'] || req.ip;
+  const rawIp = req.headers['x-forwarded-for'] || req.ip || '';
+  const ip = rawIp.split(',')[0].trim();
 
   const user = await User.findByEmail(email);
   if (!user) return unauthorized(res, 'Invalid email or password');
@@ -82,7 +83,7 @@ async function login(req, res) {
   }, 'Login successful');
 }
 
-// ── Refresh token ────────────────────────────────────
+// â”€â”€ Refresh token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function refreshToken(req, res) {
   const { refreshToken } = req.body;
   if (!refreshToken) return badRequest(res, 'Refresh token required');
@@ -105,7 +106,7 @@ async function refreshToken(req, res) {
   return success(res, { accessToken: newAccessToken }, 'Token refreshed');
 }
 
-// ── Logout ───────────────────────────────────────────
+// â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function logout(req, res) {
   const ttl = secondsUntilExpiry(req.token);
   await blacklistToken(req.token, ttl);
@@ -119,7 +120,7 @@ async function logout(req, res) {
   return success(res, null, 'Logged out successfully');
 }
 
-// ── Verify email ─────────────────────────────────────
+// â”€â”€ Verify email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function verifyEmail(req, res) {
   const { token } = req.params;
   const user = await User.verifyEmail(token);
@@ -127,7 +128,7 @@ async function verifyEmail(req, res) {
   return success(res, null, 'Email verified successfully. You can now log in.');
 }
 
-// ── Forgot password ──────────────────────────────────
+// â”€â”€ Forgot password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function forgotPassword(req, res) {
   const { email } = req.body;
   const user = await User.findByEmail(email);
@@ -142,7 +143,7 @@ async function forgotPassword(req, res) {
   return success(res, null, 'Password reset email sent.');
 }
 
-// ── Reset password ───────────────────────────────────
+// â”€â”€ Reset password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function resetPassword(req, res) {
   const { token, password } = req.body;
   const user = await User.findByResetToken(token);
@@ -155,7 +156,7 @@ async function resetPassword(req, res) {
   return success(res, null, 'Password reset successfully. Please log in.');
 }
 
-// ── Change password (authenticated) ─────────────────
+// â”€â”€ Change password (authenticated) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function changePassword(req, res) {
   const { currentPassword, newPassword } = req.body;
   const user = await User.findByIdFull(req.user.userId);
@@ -169,7 +170,7 @@ async function changePassword(req, res) {
   return success(res, null, 'Password changed successfully');
 }
 
-// ── Send OTP ─────────────────────────────────────────
+// â”€â”€ Send OTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function sendOTP(req, res) {
   const { phone } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -179,7 +180,7 @@ async function sendOTP(req, res) {
   return success(res, null, 'OTP sent to your phone');
 }
 
-// ── Verify OTP ───────────────────────────────────────
+// â”€â”€ Verify OTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function verifyPhoneOTP(req, res) {
   const { phone, otp } = req.body;
   const valid = await verifyOTP(phone, otp);
@@ -190,3 +191,4 @@ async function verifyPhoneOTP(req, res) {
 }
 
 module.exports = { register, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, changePassword, sendOTP, verifyPhoneOTP };
+

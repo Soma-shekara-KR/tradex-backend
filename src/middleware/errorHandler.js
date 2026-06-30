@@ -46,8 +46,9 @@ function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode || err.status || 500;
   const message    = statusCode < 500 ? err.message : 'Internal server error';
 
-  res.status(statusCode).json({ success: false, message, debug: { realMessage: err.message, stack: err.stack ? err.stack.split('\n').slice(0,5) : null } });
+  res.status(statusCode).json({ success: false, message });
 }
 
 module.exports = errorHandler;
+
 
