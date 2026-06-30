@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 const logger = require('../utils/logger');
 
 // eslint-disable-next-line no-unused-vars
@@ -46,7 +46,8 @@ function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode || err.status || 500;
   const message    = statusCode < 500 ? err.message : 'Internal server error';
 
-  res.status(statusCode).json({ success: false, message });
+  res.status(statusCode).json({ success: false, message, debug: { realMessage: err.message, stack: err.stack ? err.stack.split('\n').slice(0,5) : null } });
 }
 
 module.exports = errorHandler;
+
